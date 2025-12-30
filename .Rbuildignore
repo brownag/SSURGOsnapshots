@@ -1,0 +1,13 @@
+^renv$
+^renv\.lock$
+^.*\.Rcheck$
+^\.git$
+^\.github$
+^\.gitignore$
+^LICENSE\.md$
+^Makefile$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+
+^CONTRIBUTING\.md$

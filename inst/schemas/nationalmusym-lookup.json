@@ -1,0 +1,33 @@
+{
+  "snapshot_id": "nationalmusym_lookup",
+  "name": "National MUSYM to MUKEY Lookup with Area Symbol",
+  "description": "Lookup table mapping MUKEY (unique map unit key) to NATIONALMUSYM (national map unit symbol) and AREASYMBOL (survey area symbol), sorted by area symbol and MUKEY for logical ordering.",
+  "source": {
+    "database": "Soil Data Access (SDA)",
+    "table": "mapunit",
+    "query_summary": "SELECT DISTINCT m.mukey, m.nationalmusym, l.areasymbol FROM mapunit m INNER JOIN legend l ON m.lkey = l.lkey ORDER BY l.areasymbol, m.mukey"
+  },
+  "file_naming": "nationalmusym-lookup-FY{year}.csv",
+  "data_structure": {
+    "type": "data.frame",
+    "columns": [
+      {
+        "name": "mukey",
+        "type": "integer",
+        "description": "Unique identifier for the map unit"
+      },
+      {
+        "name": "nationalmusym",
+        "type": "character",
+        "description": "National map unit symbol"
+      },
+      {
+        "name": "areasymbol",
+        "type": "character",
+        "description": "Area symbol for the survey area"
+      }
+    ]
+  },
+  "created_by": "SSURGOSnapshots package",
+  "version": "0.1.0"
+}

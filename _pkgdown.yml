@@ -1,0 +1,19 @@
+url: https://humus.rocks/SSURGOsnapshots/
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [home, reference, articles, news]
+    right: [github]
+  components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    github:
+      icon: fa-github fa-lg
+      href: https://github.com/brownag/SSURGOsnapshots
+

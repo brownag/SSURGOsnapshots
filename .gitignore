@@ -1,0 +1,23 @@
+# Artifacts generated during build/CI
+artifacts/
+*.Rcheck/
+*.tar.gz
+
+# R environment files
+.Renviron
+.Rprofile
+
+# RStudio files
+.Rproj.user/
+*.Rproj
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+docs
+
+.github/copilot-instructions.md

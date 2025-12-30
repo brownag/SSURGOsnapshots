@@ -1,0 +1,84 @@
+name: Generate SSURGO Snapshot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'R/**'
+      - 'DESCRIPTION'
+      - 'inst/schemas/**'
+      - '.github/create-snapshot-release.yml'
+  schedule:
+    - cron: '0 0 1 * *'  # Monthly on the 1st
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::remotes
+            any::rcmdcheck
+            any::renv
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+      - name: Install package
+        run: remotes::install_local()
+        shell: Rscript {0}
+      - name: Run snapshot functions
+        run: |
+          Rscript -e "
+          library(SSURGOsnapshots)
+          exports <- getNamespaceExports('SSURGOsnapshots')
+          create_funcs <- grep('^create_', exports, value = TRUE)
+          for (func in create_funcs) {
+            message('Running ', func)
+            do.call(func, list())
+          }
+          "
+      - name: Get fiscal year
+        id: fy
+        run: |
+          fy=$(Rscript -e "writeLines(as.character(SSURGOsnapshots::fiscal_year_from_date()))")
+          echo "fy=$fy" >> $GITHUB_OUTPUT
+      - name: Get date
+        id: date
+        run: |
+          date=$(date +%Y-%m-%d)
+          echo "date=$date" >> $GITHUB_OUTPUT
+      - name: Update renv.lock
+        run: |
+          options(repos = c(CRAN = "https://cran.rstudio.com/", r_universe = "https://brownag.r-universe.dev/"))
+          renv::snapshot()
+        shell: Rscript {0}
+      - name: Prepare artifacts
+        run: cp renv.lock artifacts/
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssurgo-snapshot-FY${{ steps.fy.outputs.fy }}-${{ steps.date.outputs.date }}
+          path: artifacts/
+          compression-level: 6
+      - name: Prepare release
+        run: |
+          cd artifacts
+          zip -r ../ssurgo-snapshot-FY${{ steps.fy.outputs.fy }}-${{ steps.date.outputs.date }}.zip .
+      - name: Create release
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: FY${{ steps.fy.outputs.fy }}
+          name: Fiscal Year ${{ steps.fy.outputs.fy }} Snapshot
+          files: ssurgo-snapshot-FY${{ steps.fy.outputs.fy }}-${{ steps.date.outputs.date }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
