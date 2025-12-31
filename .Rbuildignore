@@ -9,5 +9,6 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-
+^artifacts$
+^system-commandline-sentinel-files$
 ^CONTRIBUTING\.md$
